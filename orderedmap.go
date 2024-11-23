@@ -245,21 +245,24 @@ func decodeSlice(dec *json.Decoder, s []interface{}, escapeHTML bool) error {
 func (o OrderedMap) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	buf.WriteByte('{')
-	encoder := json.NewEncoder(&buf)
-	encoder.SetEscapeHTML(o.escapeHTML)
 	for i, k := range o.keys {
 		if i > 0 {
 			buf.WriteByte(',')
 		}
-		// add key
-		if err := encoder.Encode(k); err != nil {
+		// Add key
+		keyBytes, err := json.Marshal(k)
+		if err != nil {
 			return nil, err
 		}
+		buf.Write(keyBytes)
 		buf.WriteByte(':')
-		// add value
-		if err := encoder.Encode(o.values[k]); err != nil {
+
+		// Add value
+		valueBytes, err := json.Marshal(o.values[k])
+		if err != nil {
 			return nil, err
 		}
+		buf.Write(valueBytes)
 	}
 	buf.WriteByte('}')
 	return buf.Bytes(), nil
